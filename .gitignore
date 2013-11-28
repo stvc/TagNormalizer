@@ -1,0 +1,15 @@
+*.apk
+*.ap_
+
+*.dex
+
+*.class
+
+bin/
+gen/
+
+local.properties
+
+.idea/workspace.xml
+.idea/tasks.xml
+

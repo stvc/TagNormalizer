@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent"
+        >
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Select Music Directory:"
+            android:id="@+id/main_textView_1"/>
+    <EditText
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Could not access SD Card"
+            android:id="@+id/main_editText_cwd" android:textSize="18dp" android:enabled="true" android:editable="false"
+            android:textStyle="italic" android:background="#ababab" android:focusable="false"/>
+    <ListView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/main_listView_dirs" android:smoothScrollbar="true" android:layout_weight="1"
+            android:layout_marginTop="5dp"/>
+    <Button
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Scan For Discrepencies"
+            android:id="@+id/main_button_scan" android:layout_gravity="bottom"/>
+</LinearLayout>
+
