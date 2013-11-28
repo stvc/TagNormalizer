@@ -81,15 +81,20 @@ public class DiscrepancyList extends Activity {
         }
     }
 
-    private void setAlbumArtistTagData(File file, String data) {
+    private void setTagData(File file, int fieldId, String data) {
         try {
+            FieldKey field;
+            if (fieldId == MediaMetadataRetriever.METADATA_KEY_ALBUM)
+                field = FieldKey.ALBUM;
+            else
+                field = FieldKey.ALBUM_ARTIST;
             AudioFile audioFile = AudioFileIO.read(file);
             Tag tag = audioFile.getTag();
             if (data == null) {
-                tag.deleteField(FieldKey.ALBUM_ARTIST);
+                tag.deleteField(field);
             }
             else {
-                tag.setField(FieldKey.ALBUM_ARTIST, data);
+                tag.setField(field, data);
             }
             audioFile.commit();
         }
@@ -101,9 +106,10 @@ public class DiscrepancyList extends Activity {
     private void handleDiscrepancy(Discrepancy discrepancy, String correctKey) {
         HashMap<String, ArrayList<File>> map = discrepancy.getUnmatchedFiles();
         for (Map.Entry<String, ArrayList<File>> entry : map.entrySet()) {
-            if (entry.getKey() != correctKey) {
+            if ((correctKey == null && entry.getKey() != null)
+                    || (correctKey != null && !correctKey.equals(entry.getKey()))) {
                 for (File f : entry.getValue()) {
-                    setAlbumArtistTagData(f, correctKey);
+                    setTagData(f, discrepancy.getType(), correctKey);
                 }
             }
         }
@@ -164,21 +170,30 @@ public class DiscrepancyList extends Activity {
 
             MediaMetadataRetriever mmr = new MediaMetadataRetriever();
             HashMap<String, ArrayList<File>> albumTagsInDir = new HashMap<String, ArrayList<File>>();
+            HashMap<String, ArrayList<File>> albumArtistTagsInDir = new HashMap<String, ArrayList<File>>();
             for (File f : files) {
                 if (f.isDirectory()) {
                     foundDiscrepancies.addAll(findDiscrepancies(f));
                 }
                 else {
                     mmr.setDataSource(f.getAbsolutePath());
-                    String albumName = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST);
+                    String albumName = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
+                    String albumArtist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST);
                     if (!albumTagsInDir.containsKey(albumName)) {
                         albumTagsInDir.put(albumName, new ArrayList<File>());
                     }
                     albumTagsInDir.get(albumName).add(f);
+                    if (!albumArtistTagsInDir.containsKey(albumArtist)) {
+                        albumArtistTagsInDir.put(albumArtist, new ArrayList<File>());
+                    }
+                    albumArtistTagsInDir.get(albumArtist).add(f);
                 }
             }
             if (albumTagsInDir.size() > 1) {
-                foundDiscrepancies.add(new Discrepancy(searchDir, albumTagsInDir));
+                foundDiscrepancies.add(new Discrepancy(searchDir, MediaMetadataRetriever.METADATA_KEY_ALBUM, albumTagsInDir));
+            }
+            if (albumArtistTagsInDir.size() > 1) {
+                foundDiscrepancies.add(new Discrepancy(searchDir, MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST, albumArtistTagsInDir));
             }
 
             return foundDiscrepancies;
@@ -188,10 +203,12 @@ public class DiscrepancyList extends Activity {
     public class Discrepancy {
         private File directory;
         private HashMap<String, ArrayList<File>> unmatchedFiles;
+        private int type;
 
-        Discrepancy(File dir, HashMap<String, ArrayList<File>> unmatched) {
+        Discrepancy(File dir, int type, HashMap<String, ArrayList<File>> unmatched) {
             directory = dir;
             unmatchedFiles = unmatched;
+            this.type = type;
         }
 
         public File getDirectory() {
@@ -200,6 +217,10 @@ public class DiscrepancyList extends Activity {
 
         public HashMap<String, ArrayList<File>> getUnmatchedFiles() {
             return unmatchedFiles;
+        }
+
+        public int getType() {
+            return type;
         }
 
         public String toString() {
