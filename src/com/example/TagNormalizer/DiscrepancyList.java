@@ -19,13 +19,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Created with IntelliJ IDEA.
- * User: stvc
- * Date: 11/27/13
- * Time: 11:27 AM
- * To change this template use File | Settings | File Templates.
- */
 public class DiscrepancyList extends Activity {
 
     private ListView discrepancyList;
